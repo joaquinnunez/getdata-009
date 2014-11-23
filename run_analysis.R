@@ -13,7 +13,7 @@ if (!file.exists(dir)) {
 }
 
 # Merges the training and the test sets to create one data set.
-print("Reading datasets and merging data")
+print("Reading datasets and merging data... this may take a while")
 training.dataset <- read.table("UCI HAR Dataset/train/X_train.txt")
 test.dataset <- read.table('UCI HAR Dataset/test/X_test.txt')
 one.dataset <- rbind(training.dataset, test.dataset)
@@ -26,17 +26,18 @@ one.dataset <- one.dataset[, std.and.mean.features]
 
 # Uses descriptive activity names to name the activities in the data set
 print("Using descriptive activity names to name the activities in the data set")
+# getting the activities
 activities.training <- read.table("UCI HAR Dataset/train/y_train.txt")
 activities.test <- read.table("UCI HAR Dataset/test/y_test.txt")
 activities <- rbind(activities.training, activities.test)
 one.dataset <- cbind(activities, one.dataset)
-
-# activity_labels <- read.table("UCI HAR Dataset/activity_labels.txt")
-# one.dataset[, 1] <- factor(activity_labels[, 1], labels = activity_labels[, 2])
-# print(one.dataset[1:8,1:8])
-
+# using descriptive names
+activity_labels <- read.table("UCI HAR Dataset/activity_labels.txt")
+one.dataset[,1] <- factor(one.dataset[,1], activity_labels[, 1], activity_labels[,2])
 
 # Appropriately labels the data set with descriptive variable names.
+one.dataset.names <- features[grep("(std|mean)", features[, 2]), 2]
+names(one.dataset) <- c(c('Activity'), as.character(one.dataset.names))
 
 # From the data set in step 4, creates a second, independent tidy data set with the average of each variable
 # for each activity and each subject.
