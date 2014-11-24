@@ -35,9 +35,28 @@ one.dataset <- cbind(activities, one.dataset)
 activity_labels <- read.table("UCI HAR Dataset/activity_labels.txt")
 one.dataset[,1] <- factor(one.dataset[,1], activity_labels[, 1], activity_labels[,2])
 
+# Previously adding the subjects of step 5
+subjects.training <- read.table("UCI HAR Dataset/train/subject_train.txt")
+subjects.test <- read.table("UCI HAR Dataset/test/subject_test.txt")
+subjects <- rbind(subjects.training, subjects.test)
+one.dataset <- cbind(subjects, one.dataset)
+
 # Appropriately labels the data set with descriptive variable names.
 one.dataset.names <- features[grep("(std|mean)", features[, 2]), 2]
-names(one.dataset) <- c(c('Activity'), as.character(one.dataset.names))
+names(one.dataset) <- c(c('Subject', 'Activity'), as.character(one.dataset.names))
 
 # From the data set in step 4, creates a second, independent tidy data set with the average of each variable
 # for each activity and each subject.
+
+### Required packages
+if (!require("plyr")) {
+   install.packages("plyr")
+   require("plyr")
+}
+
+means <- aggregate(one.dataset[, 3] ~ one.dataset$Subject + one.dataset$Activity, data = one.dataset, FUN = mean)
+for (i in 4:ncol(one.dataset)){
+   means[, i] <- aggregate(one.dataset[, i] ~ one.dataset$Subject + one.dataset$Activity, data = one.dataset, FUN = mean)[, 3]
+}
+
+write.table(means, file="tidy_dataset.txt", row.name=FALSE)
